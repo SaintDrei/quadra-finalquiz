@@ -21,35 +21,33 @@
 	{
 		$productID = $row['productID'];
 		$name = $row['name'];
-		$list_pro .= "<option value='$productID'>$name</option>";
+		$list_pro .= "<option value='$productID' name='pid'>$name</option>";
 	}
 	
 	if (isset($_POST['add']))
 	{
-		$productID = mysqli_real_escape_string($con, $_POST['productid']);
-		$quantity = mysqli_real_escape_string($con, $_POST['quantity']);
 		
-		//$sql_add = "INSERT INTO purchase_details VALUES ('', '', '$productID', '$quantity')";
-		//$sql_add = "INSERT INTO purchase_details (refNo, purchaseNo, productID, quantity) VALUES ('', '', '$productID', '$quantity')";
-		$sql_add = "INSERT INTO purchase_details VALUES ('', '', '$productID', '$quantity')";
+		$quantity = mysqli_real_escape_string($con, $_POST['quantity']);
+		$pid = mysqli_real_escape_string($con, $_POST['product']);
+		$sql_add = "INSERT INTO purchase_details VALUES ('', '', $pid, '$quantity')";
 		$con->query($sql_add) or die(mysqli_error($con));
 		header('location: add.php');
 	}
 
-	$sql_view = "SELECT productID, quantity, quantity, refNo FROM purchase_details";
+	$sql_view = "SELECT p.productID, p.quantity, p.refNo, d.productID, d.name FROM purchase_details p INNER JOIN products d WHERE p.purchaseNo=0 and p.productID = d.productID";
 	$result_view = $con->query($sql_view) or die(mysqli_error($con));
 	$list_view = "";
 	
 	while ($row4 = mysqli_fetch_array($result_view))
 	{	
-		
 	    $productID = $row4['productID'];
 		$quantity = $row4['quantity'];
         $ref = $row4['refNo'];
+		$pname = $row4['name'];
         $qtloc = $_SERVER['DOCUMENT_ROOT'] . '/lquiz/updateqty.php';
-//        <input class='fa fa-refresh upate btn btn-success btn-xs' type='submit' value='qty'>
+        
 		$list_view .= "<tr>
-							<td>$name</td>
+							<td>$pname</td>
 							
 							<td>
                             
@@ -83,6 +81,33 @@
 		$VAT = $total * .12;
 	}
 
+    $sql_totes = "SELECT SUM(quantity) as qty, purchaseNo from purchase_details where purchaseNo=0";
+    $result_sum = $con->query($sql_totes) or die(mysqli_error($con));
+    while($row55 = mysqli_fetch_array($result_sum)){
+        $totally = $row55['qty'];
+    }
+	if (isset($_POST['edd']))
+	{
+		
+        $supliar = $_POST['supplier'];
+        $supliar = mysqli_real_escape_string($con, $_POST['supplier']);
+        
+		$sql_purchase = "INSERT INTO purchases VALUES ('', $supliar, NOW(), '', '', 'Pending')";
+		$con->query($sql_purchase) or die(mysqli_error($con));
+		
+        
+        $sql_max = "SELECT MAX(purchaseNo) AS max FROM purchase_details";
+        $result_max = $con->query($sql_max) or die(mysqli_error($con));
+        while($rowyerboat = mysqli_fetch_array($result_max))
+        {
+            $maxest = $rowyerboat['max'];
+            $sql_epdate="UPDATE purchase_details SET purchaseNo = $maxest +1 WHERE purchaseNo=0";
+                $con->query($sql_epdate) or die(mysqli_error($con));
+        }
+        header('location: index.php');
+        
+
+	}
 ?>
 
 <form method="POST" class="form-horizontal" enctype="multipart/form-data">
@@ -126,17 +151,22 @@
 				</tbody>
 			</table>
             <hr>
-            Total items : 23
+            <span></span>
+            Total items : <?php echo $totally; ?>
 			
 	</div>
     <div class="form-group">
 		<div class="col-lg-offset-4 col-lg-8">
 			<button name="add" type="submit" class="btn btn-success">
-				Add
+				Add <i class="fa fa-plus"></i>
 			</button>
 		</div>
 	</div>
-  
+  <div class="form-group"> 
+    <div class="col-sm-offset-2 col-sm-10 col-lg-offset-10 col-lg-2">
+      <button type="submit" name="edd" class="btn btn-success">Submit <i class="fa fa-send"></i></button>
+    </div>
+  </div>
 </form>
 <?php
 	include_once('../../includes/footer.php');
