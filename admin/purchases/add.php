@@ -36,26 +36,39 @@
 		header('location: add.php');
 	}
 
-	$sql_view = "SELECT productID, quantity FROM purchase_details";
+	$sql_view = "SELECT productID, quantity, quantity, refNo FROM purchase_details";
 	$result_view = $con->query($sql_view) or die(mysqli_error($con));
 	$list_view = "";
-	while ($row = mysqli_fetch_array($result_view))
+	
+	while ($row4 = mysqli_fetch_array($result_view))
 	{	
 		
-		$productID = $row['productID'];
-		$quantity = $row['quantity'];
-		
-
+	    $productID = $row4['productID'];
+		$quantity = $row4['quantity'];
+        $ref = $row4['refNo'];
+        $qtloc = $_SERVER['DOCUMENT_ROOT'] . '/lquiz/updateqty.php';
+//        <input class='fa fa-refresh upate btn btn-success btn-xs' type='submit' value='qty'>
 		$list_view .= "<tr>
 							<td>$name</td>
-							<td>$quantity</td>
+							
 							<td>
-								<button class='update btn btn-success btn-xs'>
+                            
+                            
+                            <form method='get' action='./updateqty.php'>
+                            <input type='number' class='form-control' value='$quantity' style='width:100px;' name='qty'/> 
+                            </td>
+                            <td>
+                            <input type='number' value='$ref' hidden name='ref'>
+                            <button class='update btn btn-success btn-xs' onclick='return confirm(\"Update Quantity?\");'>
 									<i class='fa fa-refresh'></i>
 								</button>
-								<button class='delete btn btn-danger btn-xs'>
-									<i class='fa fa-trash'></i>
-								</button>
+                                
+                                <a href='delete.php?ref=$ref' class='btn btn-xs btn-danger' 
+										onclick='return confirm(\"Delete Item?\");''>
+										<i class='fa fa-trash'></i>
+									</a>
+                            </form>
+				                
 							</td>		
 					   </tr>";
 	}
@@ -100,7 +113,6 @@
 			</div>
 		</div>
 	</div>
-	<form class="form-horizontal" method="POST">
 		<div class="col-lg-6">
 			<table class="table table-hover">
 				<thead>
@@ -110,19 +122,21 @@
 				</thead>
 				<tbody>
 					<?php echo $list_view; ?>
+                   
 				</tbody>
 			</table>
-		</form>	
+            <hr>
+            Total items : 23
+			
 	</div>
-	<form class="form-horizontal" method="POST">
-	<div class="form-group">
+    <div class="form-group">
 		<div class="col-lg-offset-4 col-lg-8">
 			<button name="add" type="submit" class="btn btn-success">
 				Add
 			</button>
 		</div>
 	</div>
-	</form>	
+  
 </form>
 <?php
 	include_once('../../includes/footer.php');

@@ -1,32 +1,31 @@
+
 <?php 
     
 	# checks if record is selected
-	if (isset($_REQUEST['id']))
+	if (isset($_REQUEST['ref']))
 	{
 		# checks if selected record is an ID value
-		if (ctype_digit($_REQUEST['id']))
+		if (ctype_digit($_REQUEST['ref']))
 		{
-			$id = $_REQUEST['id'];
+			$ref = $_REQUEST['ref'];
 			require($_SERVER['DOCUMENT_ROOT'] . '/lquiz/config.php');
 			require($_SERVER['DOCUMENT_ROOT'] . '/lquiz/function.php');
 
 			validateAccess();
 			
 			# archives existing record
-			$sql_delete = "UPDATE suppliers SET status='Archived',
-				lastModified=NOW()
-				WHERE supplierID=$id";
+            $sql_delete = "DELETE from purchase_details WHERE refNo = $ref";
 				
 			$result = $con->query($sql_delete) or die(mysqli_error($con));
-			header('location: index.php');
+			header('location: add.php');
 		}
 		else
 		{
-			header('location: index.php');
+			header('location: add.php');
 		}
 	}
 	else
 	{
-		header('location: index.php');
+		header('location: add.php');
 	}
 ?>
